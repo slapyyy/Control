@@ -57,7 +57,7 @@ async def ping(interaction: discord.Interaction):
 	await interaction.response.send_message()
 
 
-def takeScreenshot() -> Any:
+def takeScreenshot():
 	img = pyautogui.screenshot()
 	return img
 
